@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: ipfix-collector
+  labels:
+    k8s-app: ipfix-collector
+spec:
+  selector:
+    matchLabels:
+      k8s-app: ipfix-collector
+  template:
+    metadata:
+      labels:
+        k8s-app: ipfix-collector
+    spec:
+      serviceAccountName: ebpf-agent-test
+      containers:
+        - name: ipfix-collector
+          image: quay.io/praveingk/ipfix-collector:latest
+          ports:
+            - containerPort: 9998
+              hostPort: 9998
+---
+# oc port-forward deployment/loki 3100 3000
+kind: Service
+apiVersion: v1
+metadata:
+  name: ipfix-collector
+spec:
+  selector:
+    app: ipfix-collector
+  ports:
+    - name: ipfix-collector
+      port: 9998
+      targetPort: 9998
